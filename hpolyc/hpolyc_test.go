@@ -29,12 +29,11 @@ func randIntn(n int) int {
 
 func TestHPolyC(t *testing.T) {
 	for i := 0; i < 1000; i++ {
-		var hpc HPolyC
 		block := randBytes(16 + randIntn(4096))
-		key := randBytes(32)
 		tweak := randBytes(randIntn(16))
-		ciphertext := hpc.Encrypt(block, key, tweak)
-		plaintext := hpc.Decrypt(ciphertext, key, tweak)
+		hpc := New(randBytes(32))
+		ciphertext := hpc.Encrypt(block, tweak)
+		plaintext := hpc.Decrypt(ciphertext, tweak)
 		if !bytes.Equal(plaintext, block) {
 			t.Fatal("Decrypt is not the inverse of Encrypt")
 		}
@@ -61,12 +60,12 @@ func TestHPolyCEncryptionVectors(t *testing.T) {
 		t.Fatal(err)
 	}
 	for i, test := range tests {
-		var hpc HPolyC
-		ciphertext := hpc.Encrypt(fromHex(test.Plaintext), fromHex(test.Input.Key), fromHex(test.Input.Tweak))
+		hpc := New(fromHex(test.Input.Key))
+		ciphertext := hpc.Encrypt(fromHex(test.Plaintext), fromHex(test.Input.Tweak))
 		if hex.EncodeToString(ciphertext) != test.Ciphertext {
 			t.Fatalf("%v (%v): Encryption failed:\nexp: %v\ngot: %x", test.Description, i, test.Ciphertext, ciphertext)
 		}
-		plaintext := hpc.Decrypt(fromHex(test.Ciphertext), fromHex(test.Input.Key), fromHex(test.Input.Tweak))
+		plaintext := hpc.Decrypt(fromHex(test.Ciphertext), fromHex(test.Input.Tweak))
 		if hex.EncodeToString(plaintext) != test.Plaintext {
 			t.Fatalf("%v (%v): Decryption failed:\nexp: %v\ngot: %x", test.Description, i, test.Plaintext, plaintext)
 		}
@@ -75,25 +74,23 @@ func TestHPolyCEncryptionVectors(t *testing.T) {
 
 func BenchmarkHPolyC(b *testing.B) {
 	b.Run("Encrypt", func(b *testing.B) {
-		var hpc HPolyC
 		block := randBytes(4096)
-		key := randBytes(32)
 		tweak := randBytes(12)
+		hpc := New(randBytes(32))
 		b.SetBytes(int64(len(block)))
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
-			hpc.Encrypt(block, key, tweak)
+			hpc.Encrypt(block, tweak)
 		}
 	})
 	b.Run("Decrypt", func(b *testing.B) {
-		var hpc HPolyC
 		block := randBytes(4096)
-		key := randBytes(32)
 		tweak := randBytes(12)
+		hpc := New(randBytes(32))
 		b.SetBytes(int64(len(block)))
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
-			hpc.Decrypt(block, key, tweak)
+			hpc.Decrypt(block, tweak)
 		}
 	})
 }

@@ -1,7 +1,6 @@
 package hpolyc // import "lukechampine.com/adiantum/hpolyc"
 
 import (
-	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
 	"encoding/binary"
@@ -15,19 +14,27 @@ type HPolyC struct {
 	streamKey []byte
 	block     cipher.Block
 	polyKey   [32]byte
-	hashBuf   []byte
-	sumBuf    [16]byte
+
+	hashBuf []byte
+	sumBuf  [16]byte
 }
 
-func (h *HPolyC) setupKey(key []byte) {
-	if bytes.Equal(key, h.streamKey) {
-		return
-	}
-	h.streamKey = append([]byte(nil), key...)
-	keyBuf := make([]byte, 32+16)
-	keyBuf = h.streamXOR(nil, keyBuf)
-	h.block, _ = aes.NewCipher(keyBuf[:32])
-	copy(h.polyKey[:16], keyBuf[32:])
+func (h *HPolyC) streamXOR(nonce, msg []byte) []byte {
+	var nonceBuf [chacha.XNonceSize]byte
+	n := copy(nonceBuf[:], nonce)
+	nonceBuf[n] = 1
+	chacha.XORKeyStream(msg, msg, nonceBuf[:], h.streamKey, 20)
+	return msg
+}
+
+func (h *HPolyC) encryptBlock(src []byte) []byte {
+	h.block.Encrypt(src, src)
+	return src
+}
+
+func (h *HPolyC) decryptBlock(src []byte) []byte {
+	h.block.Decrypt(src, src)
+	return src
 }
 
 func (h *HPolyC) hash(tweak, msg []byte) []byte {
@@ -50,44 +57,36 @@ func (h *HPolyC) hash(tweak, msg []byte) []byte {
 	return h.sumBuf[:]
 }
 
-func (h *HPolyC) streamXOR(nonce, msg []byte) []byte {
-	var nonceBuf [chacha.XNonceSize]byte
-	n := copy(nonceBuf[:], nonce)
-	nonceBuf[n] = 1
-	chacha.XORKeyStream(msg, msg, nonceBuf[:], h.streamKey, 20)
-	return msg
-}
-
-func (h *HPolyC) encryptBlock(src []byte) []byte {
-	h.block.Encrypt(src, src)
-	return src
-}
-
-func (h *HPolyC) decryptBlock(src []byte) []byte {
-	h.block.Decrypt(src, src)
-	return src
-}
-
-// Encrypt encrypts block using the specified key and tweak.
-func (h *HPolyC) Encrypt(block, key, tweak []byte) []byte {
-	h.setupKey(key)
+// Encrypt encrypts block using the specified tweak.
+func (h *HPolyC) Encrypt(block, tweak []byte) []byte {
 	pl, pr := block[:len(block)-16], block[len(block)-16:]
 	pm := blockAdd(pr, h.hash(tweak, pl))
 	cm := h.encryptBlock(pm)
 	cl := h.streamXOR(cm, pl)
 	cr := blockSub(cm, h.hash(tweak, cl))
-	return append(cl, cr...)
+	return append(cl, cr...) // reuses block's memory
 }
 
-// Decrypt decrypts block using the specified key and tweak.
-func (h *HPolyC) Decrypt(block, key, tweak []byte) []byte {
-	h.setupKey(key)
+// Decrypt decrypts block using the specified tweak.
+func (h *HPolyC) Decrypt(block, tweak []byte) []byte {
 	cl, cr := block[:len(block)-16], block[len(block)-16:]
 	cm := blockAdd(cr, h.hash(tweak, cl))
 	pl := h.streamXOR(cm, cl)
 	pm := h.decryptBlock(cm)
 	pr := blockSub(pm, h.hash(tweak, pl))
-	return append(pl, pr...)
+	return append(pl, pr...) // reuses block's memory
+}
+
+// New returns an HPolyC cipher with the specified key.
+func New(key []byte) *HPolyC {
+	h := &HPolyC{
+		streamKey: append([]byte(nil), key...),
+	}
+	keyBuf := make([]byte, 32+16)
+	keyBuf = h.streamXOR(nil, keyBuf)
+	h.block, _ = aes.NewCipher(keyBuf[:32])
+	copy(h.polyKey[:16], keyBuf[32:])
+	return h
 }
 
 func add64(x, y, carry uint64) (sum, carryOut uint64) {
