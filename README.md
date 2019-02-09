@@ -5,7 +5,7 @@ adiantum
 [![Go Report Card](http://goreportcard.com/badge/lukechampine.com/adiantum)](https://goreportcard.com/report/lukechampine.com/adiantum)
 
 ```
-go get lukechampine.com/adiantum/adiantum/...
+go get lukechampine.com/adiantum/...
 ```
 
 This repo contains an implementation of [HBSH](https://eprint.iacr.org/2018/720.pdf), a tweakable and length-preserving
@@ -26,8 +26,9 @@ on large messages, but more key-agile and simpler to implement.
 
 This repo currently contains only an implementation of HPolyC-XChaCha20-AES.
 This variant was chosen because it was the simplest to implement using existing
-Go crypto packages. An Adiantum implementation is planned. (The repo is named
-`adiantum` to match the name used by the original paper and [repository](https://github.com/google/adiantum).)
+Go crypto packages. You may implement your own HBSH variants using the `hbsh`
+package. An Adiantum implementation is planned. (The repo is named `adiantum` to
+match the name used by the original paper and [repository](https://github.com/google/adiantum).)
 
 
 ## Usage
@@ -36,12 +37,12 @@ Go crypto packages. An Adiantum implementation is planned. (The repo is named
 import "lukechampine.com/adiantum/hpolyc"
 
 func main() {
-    var hpc hpolyc.HPolyC
     key := make([]byte, 32) // in practice, read this from crypto/rand
+    hpc := hpolyc.New(key)
     tweak := make([]byte, 12) // can be any length
     plaintext := []byte("Hello, world!")
-    ciphertext := hpc.Encrypt(plaintext, key, tweak)
-    recovered := hpc.Decrypt(ciphertext, key, tweak)
+    ciphertext := hpc.Encrypt(plaintext, tweak)
+    recovered := hpc.Decrypt(ciphertext, tweak)
     println(string(recovered)) // Hello, world!
 }
 ```
@@ -72,5 +73,5 @@ tested on ARM rather than amd64.
 
 ```
 BenchmarkHPolyC/Encrypt-4    100000    12719 ns/op    322.04 MB/s    0 allocs/op
-BenchmarkHPolyC/Decrypt-4    100000    12929 ns/op    316.79 MB/s    0 allocs/op
+BenchmarkHPolyC/Decrypt-4    100000    12571 ns/op    325.82 MB/s    0 allocs/op
 ```

@@ -1,9 +1,6 @@
 package hpolyc
 
 import (
-	"bytes"
-	"crypto/rand"
-	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
 	"io/ioutil"
@@ -15,32 +12,7 @@ func fromHex(s string) []byte {
 	return b
 }
 
-func randBytes(n int) []byte {
-	buf := make([]byte, n)
-	rand.Read(buf)
-	return buf
-}
-
-func randIntn(n int) int {
-	r := binary.LittleEndian.Uint64(randBytes(8))
-	r %= uint64(n)
-	return int(r)
-}
-
-func TestHPolyC(t *testing.T) {
-	for i := 0; i < 1000; i++ {
-		block := randBytes(16 + randIntn(4096))
-		tweak := randBytes(randIntn(16))
-		hpc := New(randBytes(32))
-		ciphertext := hpc.Encrypt(block, tweak)
-		plaintext := hpc.Decrypt(ciphertext, tweak)
-		if !bytes.Equal(plaintext, block) {
-			t.Fatal("Decrypt is not the inverse of Encrypt")
-		}
-	}
-}
-
-func TestHPolyCEncryptionVectors(t *testing.T) {
+func TestHPolyC_XChaCha20_32_AES256(t *testing.T) {
 	// Only 100 test vectors are included. To test the full set, replace this
 	// file with the corresponding file from github.com/google/adiantum.
 	js, err := ioutil.ReadFile("testdata/HPolyC_XChaCha20_32_AES256.json")
@@ -74,9 +46,9 @@ func TestHPolyCEncryptionVectors(t *testing.T) {
 
 func BenchmarkHPolyC(b *testing.B) {
 	b.Run("Encrypt", func(b *testing.B) {
-		block := randBytes(4096)
-		tweak := randBytes(12)
-		hpc := New(randBytes(32))
+		block := make([]byte, 4096)
+		tweak := make([]byte, 12)
+		hpc := New(make([]byte, 32))
 		b.SetBytes(int64(len(block)))
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
@@ -84,9 +56,9 @@ func BenchmarkHPolyC(b *testing.B) {
 		}
 	})
 	b.Run("Decrypt", func(b *testing.B) {
-		block := randBytes(4096)
-		tweak := randBytes(12)
-		hpc := New(randBytes(32))
+		block := make([]byte, 4096)
+		tweak := make([]byte, 12)
+		hpc := New(make([]byte, 32))
 		b.SetBytes(int64(len(block)))
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
