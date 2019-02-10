@@ -4,7 +4,7 @@ import "encoding/binary"
 
 var sigma = [4]uint32{0x61707865, 0x3320646e, 0x79622d32, 0x6b206574}
 
-func hChaCha12(out *[32]byte, nonce *[16]byte, key *[32]byte) {
+func hChaCha(out *[32]byte, nonce *[16]byte, key *[32]byte, rounds int) {
 	v00 := sigma[0]
 	v01 := sigma[1]
 	v02 := sigma[2]
@@ -22,7 +22,7 @@ func hChaCha12(out *[32]byte, nonce *[16]byte, key *[32]byte) {
 	v14 := binary.LittleEndian.Uint32(nonce[8:])
 	v15 := binary.LittleEndian.Uint32(nonce[12:])
 
-	for i := 0; i < 12; i += 2 {
+	for i := 0; i < rounds; i += 2 {
 		v00 += v04
 		v12 ^= v00
 		v12 = (v12 << 16) | (v12 >> 16)

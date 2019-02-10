@@ -24,11 +24,11 @@ the block cipher, and NH and Poly1305 for hashing. This is the variant that the
 paper recommends for most uses. The paper also describes HPolyC, which is slower
 on large messages, but more key-agile and simpler to implement.
 
-This repo currently contains only an implementation of HPolyC-XChaCha20-AES.
-This variant was chosen because it was the simplest to implement using existing
-Go crypto packages. You may implement your own HBSH variants using the `hbsh`
-package. An Adiantum implementation is planned. (The repo is named `adiantum` to
-match the name used by the original paper and [repository](https://github.com/google/adiantum).)
+This repo currently contains only an implementation of HPolyC. This variant was
+chosen because it was the simplest to implement using existing Go crypto
+packages. You may implement your own HBSH variants using the `hbsh` package. An
+Adiantum implementation is planned. (The repo is named `adiantum` to match the
+name used by the original paper and [repository](https://github.com/google/adiantum).)
 
 
 ## Usage
@@ -65,13 +65,18 @@ detailed critique of disk encryption and some recommended alternatives.
 
 ## Benchmarks
 
-The paper gives a figure of 17.8 cycles per byte for HPolyC-XChaCha20-AES for a
-4096-byte sector. On a 1GHz CPU, this translates to about 56 MB/s. On my 3.8GHz
-i7, this package achieves 322 MB/s, a 50% improvement. I'm not sure what
-accounts for this disparity, but I imagine it is largely because the authors
-tested on ARM rather than amd64.
+For a 4096-byte sector, the paper gives a figure of 11.5 / 13.6 / 17.8 cycles
+per byte for the 8 / 12 / 20-round HPolyC variants. On my 3.8GHz i7, this should
+translate to about 330 / 280 / 213 MB/s. However, the benchmarks for this
+package indicate speeds of 454 / 402 / 325 MB/s, a ~40% improvement across the
+board. I'm not sure what accounts for this disparity, but I imagine it is
+largely because the authors tested on ARM, whereas my benchmarks are on amd64.
 
 ```
-BenchmarkHPolyC/Encrypt-4    100000    12719 ns/op    322.04 MB/s    0 allocs/op
-BenchmarkHPolyC/Decrypt-4    100000    12571 ns/op    325.82 MB/s    0 allocs/op
+BenchmarkHPolyC/XChaCha8_Encrypt-4        9023 ns/op      453.92 MB/s      0 allocs/op
+BenchmarkHPolyC/XChaCha8_Decrypt-4        9007 ns/op      454.74 MB/s      0 allocs/op
+BenchmarkHPolyC/XChaCha12_Encrypt-4      10186 ns/op      402.12 MB/s      0 allocs/op
+BenchmarkHPolyC/XChaCha12_Decrypt-4      10182 ns/op      402.28 MB/s      0 allocs/op
+BenchmarkHPolyC/XChaCha20_Encrypt-4      12584 ns/op      325.49 MB/s      0 allocs/op
+BenchmarkHPolyC/XChaCha20_Decrypt-4      12586 ns/op      325.44 MB/s      0 allocs/op
 ```
