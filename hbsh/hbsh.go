@@ -1,4 +1,4 @@
-package hbsh
+package hbsh // import "lukechampine.com/adiantum/hbsh"
 
 import (
 	"crypto/cipher"
