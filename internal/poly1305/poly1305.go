@@ -10,7 +10,7 @@ type Hash struct {
 // Sum implements hbsh.Hash.
 func (h *Hash) Sum(dst, src []byte) []byte {
 	var out [16]byte
-	poly1305.Sum(&out, src, (*[32]byte)(&h.key))
+	poly1305.Sum(&out, src, &h.key)
 	return append(dst, out[:]...)
 }
 
