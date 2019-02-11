@@ -41,7 +41,7 @@ func TestNH(t *testing.T) {
 	tests := readTestVectors(t, "testdata/NH.json")
 	for i, test := range tests {
 		var out [32]byte
-		Sum(&out, fromHex(test.Input.Key), fromHex(test.Input.Message))
+		Sum(&out, fromHex(test.Input.Message), fromHex(test.Input.Key))
 		if hex.EncodeToString(out[:]) != test.Hash {
 			t.Fatalf("%v (%v): Encryption failed:\nexp: %v\ngot: %x", test.Description, i, test.Hash, out[:])
 		}
@@ -57,6 +57,6 @@ func BenchmarkNH(b *testing.B) {
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
 		var out [32]byte
-		Sum(&out, key, msg)
+		Sum(&out, msg, key)
 	}
 }

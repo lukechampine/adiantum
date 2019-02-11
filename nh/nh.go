@@ -6,7 +6,7 @@ import (
 
 // Sum computes the NH hash of m with the specified key and places the result in
 // out. The key must be at least 48 bytes larger than the message.
-func Sum(out *[32]byte, key []byte, m []byte) {
+func Sum(out *[32]byte, m []byte, key []byte) {
 	var k [16]uint32
 	for i := 4; i < 16; i++ {
 		k[i] = binary.LittleEndian.Uint32(key[:4])
