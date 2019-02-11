@@ -5,9 +5,9 @@ import (
 	"encoding/binary"
 )
 
-// A StreamCipher xors bytes with a keystream, modified by a nonce.
+// A StreamCipher xors msg with a keystream, modified by a nonce.
 type StreamCipher interface {
-	XORKeyStream(dst, src, nonce []byte)
+	XORKeyStream(msg, nonce []byte)
 }
 
 // TweakableHash is a tweakable cryptographic hash function. It appends the hash of src to dst and
@@ -27,9 +27,7 @@ type HBSH struct {
 }
 
 func (h *HBSH) streamXOR(nonce, msg []byte) []byte {
-	n := copy(h.nonceBuf[:], nonce)
-	h.nonceBuf[n] = 1
-	h.stream.XORKeyStream(msg, msg, h.nonceBuf[:])
+	h.stream.XORKeyStream(msg, nonce)
 	return msg
 }
 

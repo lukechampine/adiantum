@@ -9,30 +9,16 @@ import (
 // NonceSize is the size of the XChaCha nonce.
 const NonceSize = chacha.XNonceSize
 
-// Cipher implements hbsh.StreamCipher with XChaCha.
-type Cipher struct {
-	key    []byte
-	rounds int
-}
-
-// XORKeyStream implements hbsh.StreamCipher.
-func (c *Cipher) XORKeyStream(dst, src, nonce []byte) {
+// XORKeyStream xors the bytes of src with the key stream derived from the key
+// and nonce.
+func XORKeyStream(dst, src, nonce, key []byte, rounds int) {
 	// expand nonce with HChaCha
 	var tmpKey [32]byte
 	var hNonce [16]byte
 	copy(hNonce[:], nonce[:16])
-	copy(tmpKey[:], c.key)
-	hChaCha(&tmpKey, &hNonce, &tmpKey, c.rounds)
-	chacha.XORKeyStream(dst, src, nonce[16:], tmpKey[:], c.rounds)
-}
-
-// New returns an XChaCha stream cipher using the specified key and number of
-// rounds. It panics if rounds is not 8, 12, or 20.
-func New(key []byte, rounds int) *Cipher {
-	if !(rounds == 8 || rounds == 12 || rounds == 20) {
-		panic("chacha: invalid number of rounds")
-	}
-	return &Cipher{key, rounds}
+	copy(tmpKey[:], key)
+	hChaCha(&tmpKey, &hNonce, &tmpKey, rounds)
+	chacha.XORKeyStream(dst, src, nonce[16:], tmpKey[:], rounds)
 }
 
 var sigma = [4]uint32{0x61707865, 0x3320646e, 0x79622d32, 0x6b206574}

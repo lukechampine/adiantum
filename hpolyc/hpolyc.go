@@ -36,13 +36,23 @@ func (h *hpolycHash) Sum(dst, msg, tweak []byte) []byte {
 	return append(dst, out[:]...)
 }
 
+type chachaStream struct {
+	key    []byte
+	rounds int
+}
+
+func (s *chachaStream) XORKeyStream(msg, nonce []byte) {
+	nonceBuf := make([]byte, 24)
+	n := copy(nonceBuf, nonce)
+	nonceBuf[n] = 1
+	xchacha.XORKeyStream(msg, msg, nonceBuf, s.key, s.rounds)
+}
+
 func makeHPolyC(key []byte, chachaRounds int) (hbsh.StreamCipher, cipher.Block, hbsh.TweakableHash) {
 	// create stream cipher and derive block+hash keys
-	stream := xchacha.New(key, chachaRounds)
+	stream := &chachaStream{key, chachaRounds}
 	keyBuf := make([]byte, 48)
-	nonce := make([]byte, xchacha.NonceSize)
-	nonce[0] = 1
-	stream.XORKeyStream(keyBuf, keyBuf, nonce)
+	stream.XORKeyStream(keyBuf, nil)
 	block, _ := aes.NewCipher(keyBuf[:32])
 	hash := new(hpolycHash)
 	copy(hash.key[:16], keyBuf[32:])

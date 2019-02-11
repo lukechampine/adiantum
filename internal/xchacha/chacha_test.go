@@ -13,12 +13,11 @@ func BenchmarkXChaCha(b *testing.B) {
 
 	withRounds := func(rounds int) func(*testing.B) {
 		return func(b *testing.B) {
-			c := New(key, rounds)
 			msg := make([]byte, 4096)
 			b.SetBytes(int64(len(msg)))
 			b.ReportAllocs()
 			for i := 0; i < b.N; i++ {
-				c.XORKeyStream(msg, msg, nonce)
+				XORKeyStream(msg, msg, nonce, key, rounds)
 			}
 		}
 	}
