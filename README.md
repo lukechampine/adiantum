@@ -5,26 +5,29 @@ adiantum
 [![Go Report Card](http://goreportcard.com/badge/lukechampine.com/adiantum)](https://goreportcard.com/report/lukechampine.com/adiantum)
 
 ```
-go get lukechampine.com/adiantum/...
+go get lukechampine.com/adiantum
 ```
 
-This repo contains an implementation of [HBSH](https://en.wikipedia.org/wiki/Adiantum_(cipher)), a tweakable and length-preserving
-encryption mode. These properties make HBSH a good choice for disk encryption.
-Furthermore, HBSH is a "super-pseudorandom permutation", meaning that changing a
-single bit of the plaintext scrambles the entire ciphertext; this is in contrast
-to the most common disk encryption mode, XTS, where one bitflip scrambles only
-16 bytes of the ciphertext.
+This repo contains an implementation of [Adiantum](https://github.com/google/adiantum), a tweakable and length-preserving
+encryption cipher.
+
+Adiantum is an instance of HBSH, an encryption mode designed for disk
+encryption. In addition to being tweakable and length-preserving, HBSH is a
+"super-pseudorandom permutation", meaning that changing a single bit of the
+plaintext scrambles the entire ciphertext; this is in contrast to the most
+common disk encryption mode, XTS, where one bitflip scrambles only 16 bytes of
+the ciphertext.
 
 HBSH is a construction, not a primitive. Specifically, it is built from a stream
 cipher, a block cipher, and a hash function. The [original paper](https://eprint.iacr.org/2018/720.pdf) provides a proof
 that this construction is secure if the underlying primitives are secure.
 
-Adiantum is a form of HBSH that uses XChaCha12 for the stream cipher, AES for
-the block cipher, and NH and Poly1305 for hashing. This is the variant that the
-paper recommends for most uses. The paper also describes HPolyC, which is slower
-on large messages, but more key-agile and simpler to implement.
+Adiantum uses XChaCha12 for its stream cipher, AES for its block cipher, and NH
+and Poly1305 for hashing. The paper also describes a closely-related instance of
+HBSH called HPolyC, which is slower on large messages, but more key-agile and
+simpler to implement.
 
-This repo currently contains implementation of Adiantum and HPolyC, with 8, 12,
+This repo currently contains implementations of Adiantum and HPolyC, with 8, 12,
 and 20-round variants. (12 rounds is the standard variant.) You can also
 implement your own HBSH variants using the `hbsh` package.
 
