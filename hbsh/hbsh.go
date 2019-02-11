@@ -5,53 +5,36 @@ import (
 	"encoding/binary"
 )
 
-// A StreamCipher xors bytes with a keystream.
+// A StreamCipher xors bytes with a keystream, modified by a nonce.
 type StreamCipher interface {
-	XORKeyStream(nonce, dst, src []byte)
-	NonceSize() int
+	XORKeyStream(dst, src, nonce []byte)
 }
 
-// Hash is a cryptographic hash function. It appends the hash of src to dst and
+// TweakableHash is a tweakable cryptographic hash function. It appends the hash of src to dst and
 // returns it.
-type Hash interface {
-	Sum(dst, src []byte) []byte
+type TweakableHash interface {
+	Sum(dst, msg, tweak []byte) []byte
 }
 
 // HBSH is a cipher using the HBSH encryption mode.
 type HBSH struct {
 	stream StreamCipher
 	block  cipher.Block
-	hash   Hash
+	thash  TweakableHash
 
-	nonceBuf []byte
-	hashBuf  []byte
-	sumBuf   []byte
-}
-
-func (h *HBSH) tweakedHash(tweak, msg []byte) []byte {
-	needed := 4 + len(tweak) + len(msg)
-	if headerSize := 4 + len(tweak); headerSize%16 != 0 {
-		needed += 16 - (headerSize % 16)
-	}
-	if needed > cap(h.hashBuf) {
-		h.hashBuf = make([]byte, needed)
-	}
-	h.hashBuf = h.hashBuf[:needed]
-	binary.LittleEndian.PutUint32(h.hashBuf[:4], uint32(8*len(tweak)))
-	copy(h.hashBuf[4:], tweak)
-	copy(h.hashBuf[needed-len(msg):], msg)
-	h.sumBuf = h.hash.Sum(h.sumBuf[:0], h.hashBuf)
-	return h.sumBuf
+	nonceBuf [24]byte
+	hashBuf  [16]byte
 }
 
 func (h *HBSH) streamXOR(nonce, msg []byte) []byte {
-	for i := range h.nonceBuf {
-		h.nonceBuf[i] = 0
-	}
-	n := copy(h.nonceBuf, nonce)
+	n := copy(h.nonceBuf[:], nonce)
 	h.nonceBuf[n] = 1
-	h.stream.XORKeyStream(h.nonceBuf, msg, msg)
+	h.stream.XORKeyStream(msg, msg, h.nonceBuf[:])
 	return msg
+}
+
+func (h *HBSH) hash(tweak, msg []byte) []byte {
+	return h.thash.Sum(h.hashBuf[:0], msg, tweak)
 }
 
 func (h *HBSH) encryptBlock(src []byte) []byte {
@@ -67,30 +50,29 @@ func (h *HBSH) decryptBlock(src []byte) []byte {
 // Encrypt encrypts block using the specified tweak.
 func (h *HBSH) Encrypt(block, tweak []byte) []byte {
 	pl, pr := block[:len(block)-16], block[len(block)-16:]
-	pm := blockAdd(pr, h.tweakedHash(tweak, pl))
+	pm := blockAdd(pr, h.hash(tweak, pl))
 	cm := h.encryptBlock(pm)
 	cl := h.streamXOR(cm, pl)
-	cr := blockSub(cm, h.tweakedHash(tweak, cl))
+	cr := blockSub(cm, h.hash(tweak, cl))
 	return append(cl, cr...)
 }
 
 // Decrypt decrypts block using the specified tweak.
 func (h *HBSH) Decrypt(block, tweak []byte) []byte {
 	cl, cr := block[:len(block)-16], block[len(block)-16:]
-	cm := blockAdd(cr, h.tweakedHash(tweak, cl))
+	cm := blockAdd(cr, h.hash(tweak, cl))
 	pl := h.streamXOR(cm, cl)
 	pm := h.decryptBlock(cm)
-	pr := blockSub(pm, h.tweakedHash(tweak, pl))
+	pr := blockSub(pm, h.hash(tweak, pl))
 	return append(pl, pr...)
 }
 
 // New returns an HBSH cipher using the specified primitives.
-func New(stream StreamCipher, block cipher.Block, hash Hash) *HBSH {
+func New(stream StreamCipher, block cipher.Block, hash TweakableHash) *HBSH {
 	return &HBSH{
-		stream:   stream,
-		block:    block,
-		hash:     hash,
-		nonceBuf: make([]byte, stream.NonceSize()),
+		stream: stream,
+		block:  block,
+		thash:  hash,
 	}
 }
 

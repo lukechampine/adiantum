@@ -16,7 +16,7 @@ type Cipher struct {
 }
 
 // XORKeyStream implements hbsh.StreamCipher.
-func (c *Cipher) XORKeyStream(nonce, dst, src []byte) {
+func (c *Cipher) XORKeyStream(dst, src, nonce []byte) {
 	// expand nonce with HChaCha
 	var tmpKey [32]byte
 	var hNonce [16]byte
@@ -25,9 +25,6 @@ func (c *Cipher) XORKeyStream(nonce, dst, src []byte) {
 	hChaCha(&tmpKey, &hNonce, &tmpKey, c.rounds)
 	chacha.XORKeyStream(dst, src, nonce[16:], tmpKey[:], c.rounds)
 }
-
-// NonceSize implements hbsh.StreamCipher.
-func (Cipher) NonceSize() int { return chacha.XNonceSize }
 
 // New returns an XChaCha stream cipher using the specified key and number of
 // rounds. It panics if rounds is not 8, 12, or 20.

@@ -3,23 +3,49 @@ package hpolyc // import "lukechampine.com/adiantum/hpolyc"
 import (
 	"crypto/aes"
 	"crypto/cipher"
+	"encoding/binary"
 
+	"golang.org/x/crypto/poly1305"
 	"lukechampine.com/adiantum/hbsh"
-	"lukechampine.com/adiantum/internal/poly1305"
 	"lukechampine.com/adiantum/internal/xchacha"
 )
 
-func makeHPolyC(key []byte, chachaRounds int) (hbsh.StreamCipher, cipher.Block, hbsh.Hash) {
+type hpolycHash struct {
+	key     [32]byte
+	hashBuf []byte
+}
+
+func (h *hpolycHash) Sum(dst, msg, tweak []byte) []byte {
+	needed := 4 + len(tweak) + len(msg)
+	if headerSize := 4 + len(tweak); headerSize%16 != 0 {
+		needed += 16 - (headerSize % 16)
+	}
+	if needed > cap(h.hashBuf) {
+		h.hashBuf = make([]byte, needed)
+	}
+	h.hashBuf = h.hashBuf[:needed]
+	binary.LittleEndian.PutUint32(h.hashBuf[:4], uint32(8*len(tweak)))
+	copy(h.hashBuf[4:], tweak)
+	copy(h.hashBuf[needed-len(msg):], msg)
+	var out [16]byte
+	poly1305.Sum(&out, h.hashBuf, &h.key)
+	// clear secrets
+	for i := range h.hashBuf {
+		h.hashBuf[i] = 0
+	}
+	return append(dst, out[:]...)
+}
+
+func makeHPolyC(key []byte, chachaRounds int) (hbsh.StreamCipher, cipher.Block, hbsh.TweakableHash) {
 	// create stream cipher and derive block+hash keys
 	stream := xchacha.New(key, chachaRounds)
-	keyBuf := make([]byte, 64)
+	keyBuf := make([]byte, 48)
 	nonce := make([]byte, xchacha.NonceSize)
 	nonce[0] = 1
-	// we only want 16 bytes of entropy for poly1305, so leave the trailing 16
-	// bytes zeroed
-	stream.XORKeyStream(nonce, keyBuf[:48], keyBuf[:48])
+	stream.XORKeyStream(keyBuf, keyBuf, nonce)
 	block, _ := aes.NewCipher(keyBuf[:32])
-	hash := poly1305.New(keyBuf[32:64])
+	hash := new(hpolycHash)
+	copy(hash.key[:16], keyBuf[32:])
 	return stream, block, hash
 }
 

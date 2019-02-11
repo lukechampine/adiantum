@@ -18,7 +18,7 @@ func BenchmarkXChaCha(b *testing.B) {
 			b.SetBytes(int64(len(msg)))
 			b.ReportAllocs()
 			for i := 0; i < b.N; i++ {
-				c.XORKeyStream(nonce, msg, msg)
+				c.XORKeyStream(msg, msg, nonce)
 			}
 		}
 	}
