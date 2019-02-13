@@ -67,19 +67,19 @@ detailed critique of disk encryption and some recommended alternatives.
 ## Benchmarks
 
 ```
-BenchmarkAdiantum/XChaCha8_Encrypt-4     13462 ns/op      304.25 MB/s      0 allocs/op
-BenchmarkAdiantum/XChaCha8_Decrypt-4     13372 ns/op      306.31 MB/s      0 allocs/op
-BenchmarkAdiantum/XChaCha12_Encrypt-4    14235 ns/op      287.73 MB/s      0 allocs/op
-BenchmarkAdiantum/XChaCha12_Decrypt-4    14144 ns/op      289.58 MB/s      0 allocs/op
-BenchmarkAdiantum/XChaCha20_Encrypt-4    16566 ns/op      247.25 MB/s      0 allocs/op
-BenchmarkAdiantum/XChaCha20_Decrypt-4    16549 ns/op      247.50 MB/s      0 allocs/op
+BenchmarkAdiantum/XChaCha8_Encrypt-4      7289 ns/op      561.87 MB/s      0 allocs/op
+BenchmarkAdiantum/XChaCha8_Decrypt-4      7249 ns/op      565.01 MB/s      0 allocs/op
+BenchmarkAdiantum/XChaCha12_Encrypt-4     7558 ns/op      541.91 MB/s      0 allocs/op
+BenchmarkAdiantum/XChaCha12_Decrypt-4     7521 ns/op      544.57 MB/s      0 allocs/op
+BenchmarkAdiantum/XChaCha20_Encrypt-4     8097 ns/op      505.86 MB/s      0 allocs/op
+BenchmarkAdiantum/XChaCha20_Decrypt-4     8073 ns/op      507.34 MB/s      0 allocs/op
 
-BenchmarkHPolyC/XChaCha8_Encrypt-4        9023 ns/op      453.92 MB/s      0 allocs/op
-BenchmarkHPolyC/XChaCha8_Decrypt-4        9007 ns/op      454.74 MB/s      0 allocs/op
-BenchmarkHPolyC/XChaCha12_Encrypt-4      10186 ns/op      402.12 MB/s      0 allocs/op
-BenchmarkHPolyC/XChaCha12_Decrypt-4      10182 ns/op      402.28 MB/s      0 allocs/op
-BenchmarkHPolyC/XChaCha20_Encrypt-4      12584 ns/op      325.49 MB/s      0 allocs/op
-BenchmarkHPolyC/XChaCha20_Decrypt-4      12586 ns/op      325.44 MB/s      0 allocs/op
+BenchmarkHPolyC/XChaCha8_Encrypt-4        3448 ns/op     1187.74 MB/s      0 allocs/op
+BenchmarkHPolyC/XChaCha8_Decrypt-4        3437 ns/op     1191.50 MB/s      0 allocs/op
+BenchmarkHPolyC/XChaCha12_Encrypt-4       3719 ns/op     1101.19 MB/s      0 allocs/op
+BenchmarkHPolyC/XChaCha12_Decrypt-4       3709 ns/op     1104.32 MB/s      0 allocs/op
+BenchmarkHPolyC/XChaCha20_Encrypt-4       4258 ns/op      961.77 MB/s      0 allocs/op
+BenchmarkHPolyC/XChaCha20_Decrypt-4       4245 ns/op      964.82 MB/s      0 allocs/op
 ```
 
 Currently, this package's Adiantum implementation is slower than its HPolyC
@@ -89,9 +89,7 @@ hash; this package uses a naive, pure-Go implementation. I do plan to implement
 NH in assembly at some point, after which Adiantum will (hopefully) be faster
 than HPolyC.
 
-Interestingly, the HPolyC benchmarks are faster than the figures given in the
-original paper, which cited speeds of 11.5 / 13.6 / 17.8 cycles per byte for the
-8 / 12 / 20-round variants. On my 3.8GHz i7, these should correspond to 330 /
-280 / 213 MB/s, respectively. I'm not sure what accounts for this disparity, but
-I imagine it is largely because the authors tested on ARM, whereas my benchmarks
-are on amd64.
+Interestingly, my benchmarks are 2-3x faster than the figures given in the
+original paper. I'm not sure what accounts for this disparity, but I imagine it
+is largely because the authors tested on ARM, whereas my benchmarks are on
+amd64.
