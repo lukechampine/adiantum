@@ -28,16 +28,21 @@ func (h *hashNHPoly1305) Sum(dst, msg, tweak []byte) []byte {
 	var outT [16]byte
 	poly1305.Sum(&outT, append(tweakBuf[:16], tweak...), &h.keyT)
 
-	// NH hash message in chunks of 1024 bytes
+	// NH hash message in chunks of up to 1024 bytes
+	var outNH [32]byte
 	hashBuf := make([]byte, 0, 1024)
-	for buf := bytes.NewBuffer(msg); buf.Len() > 0; {
-		// get up to 1024 bytes, padding to next multiple of 16
+	buf := bytes.NewBuffer(msg)
+	for buf.Len() > 0 && buf.Len()%16 == 0 {
+		nh.Sum(&outNH, buf.Next(1024), h.keyNH[:])
+		hashBuf = append(hashBuf, outNH[:]...)
+	}
+	// if final chunk is not a multiple of 16 bytes, pad it
+	if buf.Len() > 0 {
 		var msgBuf [1024]byte
 		n := copy(msgBuf[:], buf.Next(1024))
 		if n%16 != 0 {
 			n += 16 - (n % 16)
 		}
-		var outNH [32]byte
 		nh.Sum(&outNH, msgBuf[:n], h.keyNH[:])
 		hashBuf = append(hashBuf, outNH[:]...)
 	}
