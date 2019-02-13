@@ -10,10 +10,10 @@ type StreamCipher interface {
 	XORKeyStream(msg, nonce []byte)
 }
 
-// TweakableHash is a tweakable cryptographic hash function. It appends the hash of src to dst and
-// returns it.
+// TweakableHash is a tweakable cryptographic hash function. It appends the hash
+// of src to dst and returns it.
 type TweakableHash interface {
-	Sum(dst, msg, tweak []byte) []byte
+	Sum(dst, src, tweak []byte) []byte
 }
 
 // HBSH is a cipher using the HBSH encryption mode.
