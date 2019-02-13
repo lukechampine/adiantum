@@ -21,6 +21,10 @@ func XORKeyStream(dst, src, nonce, key []byte, rounds int) {
 	chacha.XORKeyStream(dst, src, nonce[16:], tmpKey[:], rounds)
 }
 
+// NOTE: Don't bother trying to optimize hChaCha; it contributes very little to
+// the total runtime of XORKeyStream. I tried swapping in an asm version and it
+// only shaved off about 30ns.
+
 var sigma = [4]uint32{0x61707865, 0x3320646e, 0x79622d32, 0x6b206574}
 
 func hChaCha(out *[32]byte, nonce *[16]byte, key *[32]byte, rounds int) {
