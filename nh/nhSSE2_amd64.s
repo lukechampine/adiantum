@@ -2,26 +2,26 @@
 
 // Direct translation of nh-sse2-x86_64.S from github.com/google/adiantum
 
-#define PASS0_SUMS	X0
-#define PASS1_SUMS	X1
-#define PASS2_SUMS	X2
-#define PASS3_SUMS	X3
-#define K0		X4
-#define K1		X5
-#define K2		X6
-#define K3		X7
-#define T0		X8
-#define T1		X9
-#define T2		X10
-#define T3		X11
-#define T4		X12
-#define T5		X13
-#define T6		X14
-#define T7		X15
-#define KEY		DI
-#define MESSAGE		SI
+#define PASS0_SUMS  X0
+#define PASS1_SUMS  X1
+#define PASS2_SUMS  X2
+#define PASS3_SUMS  X3
+#define K0          X4
+#define K1          X5
+#define K2          X6
+#define K3          X7
+#define T0          X8
+#define T1          X9
+#define T2          X10
+#define T3          X11
+#define T4          X12
+#define T5          X13
+#define T6          X14
+#define T7          X15
+#define KEY         DI
+#define MESSAGE     SI
 #define MESSAGE_LEN	DX
-#define HASH		CX
+#define HASH        CX
 
 #define STRIDE(k0, k1, k2, k3, offset) \
 	MOVOU   offset(MESSAGE), T1; \

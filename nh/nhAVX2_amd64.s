@@ -2,31 +2,31 @@
 
 // Direct translation of nh-avx2-x86_64.S from github.com/google/adiantum
 
-#define PASS0_SUMS	Y0
-#define PASS1_SUMS	Y1
-#define PASS2_SUMS	Y2
-#define PASS3_SUMS	Y3
-#define K0		    Y4
-#define K0_XMM		X4
-#define K1		    Y5
-#define K1_XMM		X5
-#define K2		    Y6
-#define K2_XMM		X6
-#define K3	    	Y7
-#define K3_XMM		X7
-#define T0	    	Y8
-#define T1	    	Y9
-#define T2	    	Y10
-#define T2_XMM		X10
-#define T3	    	Y11
-#define T3_XMM		X11
-#define T4	    	Y12
-#define T5	    	Y13
-#define T6	    	Y14
-#define T7		    Y15
-#define KEY		    DI
-#define MESSAGE		SI
-#define MESSAGE_LEN	DX
+#define PASS0_SUMS  Y0
+#define PASS1_SUMS  Y1
+#define PASS2_SUMS  Y2
+#define PASS3_SUMS  Y3
+#define K0          Y4
+#define K0_XMM      X4
+#define K1          Y5
+#define K1_XMM      X5
+#define K2          Y6
+#define K2_XMM      X6
+#define K3          Y7
+#define K3_XMM      X7
+#define T0          Y8
+#define T1          Y9
+#define T2          Y10
+#define T2_XMM      X10
+#define T3          Y11
+#define T3_XMM      X11
+#define T4          Y12
+#define T5          Y13
+#define T6          Y14
+#define T7          Y15
+#define KEY         DI
+#define MESSAGE     SI
+#define MESSAGE_LEN DX
 #define HASH        CX
 
 #define STRIDE2X(k0, k1, k2, k3) \
