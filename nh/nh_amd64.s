@@ -53,13 +53,3 @@ NH_LOOP:
 	MOVQ Sum2, 2*8(Dst)
 	MOVQ Sum3, 3*8(Dst)
 	RET
-
-#undef Dst
-#undef Src
-#undef N
-#undef Key
-#undef ROUND
-#undef Sum0
-#undef Sum1
-#undef Sum2
-#undef Sum3

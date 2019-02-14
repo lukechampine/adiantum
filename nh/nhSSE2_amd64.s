@@ -103,24 +103,3 @@ LDONE:
 	MOVOU      T0, 0*16(HASH)
 	MOVOU      T1, 1*16(HASH)
 	RET
-
-#undef PASS0_SUMS
-#undef PASS1_SUMS
-#undef PASS2_SUMS
-#undef PASS3_SUMS
-#undef K0
-#undef K1
-#undef K2
-#undef K3
-#undef T0
-#undef T1
-#undef T2
-#undef T3
-#undef T4
-#undef T5
-#undef T6
-#undef T7
-#undef KEY
-#undef MESSAGE
-#undef MESSAGE_LEN
-#undef HASH

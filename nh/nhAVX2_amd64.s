@@ -127,30 +127,3 @@ LDONE:
 	VPADDQ  T4, T0, T0
 	VMOVDQU T0, (HASH)
 	RET
-
-#undef PASS0_SUMS
-#undef PASS1_SUMS
-#undef PASS2_SUMS
-#undef PASS3_SUMS
-#undef K0
-#undef K0_XMM
-#undef K1
-#undef K1_XMM
-#undef K2
-#undef K2_XMM
-#undef K3
-#undef K3_XMM
-#undef T0
-#undef T1
-#undef T2
-#undef T2_XMM
-#undef T3
-#undef T3_XMM
-#undef T4
-#undef T5
-#undef T6
-#undef T7
-#undef KEY
-#undef MESSAGE
-#undef MESSAGE_LEN
-#undef HASH
