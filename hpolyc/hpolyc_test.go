@@ -38,8 +38,6 @@ func readTestVectors(t *testing.T, filename string) []testVector {
 }
 
 func TestHPolyC_XChaCha8_32_AES256(t *testing.T) {
-	// Only 100 test vectors are included. To test the full set, replace this
-	// file with the corresponding file from github.com/google/adiantum.
 	tests := readTestVectors(t, "testdata/HPolyC_XChaCha8_32_AES256.json")
 	for i, test := range tests {
 		hpc := New8(fromHex(test.Input.Key))
@@ -55,8 +53,6 @@ func TestHPolyC_XChaCha8_32_AES256(t *testing.T) {
 }
 
 func TestHPolyC_XChaCha12_32_AES256(t *testing.T) {
-	// Only 100 test vectors are included. To test the full set, replace this
-	// file with the corresponding file from github.com/google/adiantum.
 	tests := readTestVectors(t, "testdata/HPolyC_XChaCha12_32_AES256.json")
 	for i, test := range tests {
 		hpc := New(fromHex(test.Input.Key))
@@ -72,8 +68,6 @@ func TestHPolyC_XChaCha12_32_AES256(t *testing.T) {
 }
 
 func TestHPolyC_XChaCha20_32_AES256(t *testing.T) {
-	// Only 100 test vectors are included. To test the full set, replace this
-	// file with the corresponding file from github.com/google/adiantum.
 	tests := readTestVectors(t, "testdata/HPolyC_XChaCha20_32_AES256.json")
 	for i, test := range tests {
 		hpc := New20(fromHex(test.Input.Key))

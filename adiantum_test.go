@@ -38,39 +38,29 @@ func readTestVectors(t *testing.T, filename string) []testVector {
 }
 
 func TestAdiantum_XChaCha8_32_AES256(t *testing.T) {
-	// Only 100 test vectors are included. To test the full set, replace this
-	// file with the corresponding file from github.com/google/adiantum.
 	tests := readTestVectors(t, "testdata/Adiantum_XChaCha8_32_AES256.json")
 	for i, test := range tests {
-		hpc := New8(fromHex(test.Input.Key))
-		ciphertext := hpc.Encrypt(fromHex(test.Plaintext), fromHex(test.Input.Tweak))
+		c := New8(fromHex(test.Input.Key))
+		ciphertext := c.Encrypt(fromHex(test.Plaintext), fromHex(test.Input.Tweak))
 		if hex.EncodeToString(ciphertext) != test.Ciphertext {
 			t.Fatalf("%v (%v): Encryption failed:\nexp: %v\ngot: %x", test.Description, i, test.Ciphertext, ciphertext)
 		}
-		plaintext := hpc.Decrypt(fromHex(test.Ciphertext), fromHex(test.Input.Tweak))
+		plaintext := c.Decrypt(fromHex(test.Ciphertext), fromHex(test.Input.Tweak))
 		if hex.EncodeToString(plaintext) != test.Plaintext {
 			t.Fatalf("%v (%v): Decryption failed:\nexp: %v\ngot: %x", test.Description, i, test.Plaintext, plaintext)
 		}
 	}
-	trunc := tests[:0]
-	for i := 0; i < len(tests); i += 28 {
-		trunc = append(trunc, tests[i])
-	}
-	js, _ := json.MarshalIndent(trunc[:100], "", "\t")
-	ioutil.WriteFile("foo.json", js, 0666)
 }
 
 func TestAdiantum_XChaCha12_32_AES256(t *testing.T) {
-	// Only 100 test vectors are included. To test the full set, replace this
-	// file with the corresponding file from github.com/google/adiantum.
 	tests := readTestVectors(t, "testdata/Adiantum_XChaCha12_32_AES256.json")
 	for i, test := range tests {
-		hpc := New(fromHex(test.Input.Key))
-		ciphertext := hpc.Encrypt(fromHex(test.Plaintext), fromHex(test.Input.Tweak))
+		c := New(fromHex(test.Input.Key))
+		ciphertext := c.Encrypt(fromHex(test.Plaintext), fromHex(test.Input.Tweak))
 		if hex.EncodeToString(ciphertext) != test.Ciphertext {
 			t.Fatalf("%v (%v): Encryption failed:\nexp: %v\ngot: %x", test.Description, i, test.Ciphertext, ciphertext)
 		}
-		plaintext := hpc.Decrypt(fromHex(test.Ciphertext), fromHex(test.Input.Tweak))
+		plaintext := c.Decrypt(fromHex(test.Ciphertext), fromHex(test.Input.Tweak))
 		if hex.EncodeToString(plaintext) != test.Plaintext {
 			t.Fatalf("%v (%v): Decryption failed:\nexp: %v\ngot: %x", test.Description, i, test.Plaintext, plaintext)
 		}
@@ -78,16 +68,14 @@ func TestAdiantum_XChaCha12_32_AES256(t *testing.T) {
 }
 
 func TestAdiantum_XChaCha20_32_AES256(t *testing.T) {
-	// Only 100 test vectors are included. To test the full set, replace this
-	// file with the corresponding file from github.com/google/adiantum.
 	tests := readTestVectors(t, "testdata/Adiantum_XChaCha20_32_AES256.json")
 	for i, test := range tests {
-		hpc := New20(fromHex(test.Input.Key))
-		ciphertext := hpc.Encrypt(fromHex(test.Plaintext), fromHex(test.Input.Tweak))
+		c := New20(fromHex(test.Input.Key))
+		ciphertext := c.Encrypt(fromHex(test.Plaintext), fromHex(test.Input.Tweak))
 		if hex.EncodeToString(ciphertext) != test.Ciphertext {
 			t.Fatalf("%v (%v): Encryption failed:\nexp: %v\ngot: %x", test.Description, i, test.Ciphertext, ciphertext)
 		}
-		plaintext := hpc.Decrypt(fromHex(test.Ciphertext), fromHex(test.Input.Tweak))
+		plaintext := c.Decrypt(fromHex(test.Ciphertext), fromHex(test.Input.Tweak))
 		if hex.EncodeToString(plaintext) != test.Plaintext {
 			t.Fatalf("%v (%v): Decryption failed:\nexp: %v\ngot: %x", test.Description, i, test.Plaintext, plaintext)
 		}
@@ -95,25 +83,25 @@ func TestAdiantum_XChaCha20_32_AES256(t *testing.T) {
 }
 
 func BenchmarkAdiantum(b *testing.B) {
-	runEncrypt := func(hpc *hbsh.HBSH) func(*testing.B) {
+	runEncrypt := func(c *hbsh.HBSH) func(*testing.B) {
 		return func(b *testing.B) {
 			block := make([]byte, 4096)
 			tweak := make([]byte, 12)
 			b.SetBytes(int64(len(block)))
 			b.ReportAllocs()
 			for i := 0; i < b.N; i++ {
-				hpc.Encrypt(block, tweak)
+				c.Encrypt(block, tweak)
 			}
 		}
 	}
-	runDecrypt := func(hpc *hbsh.HBSH) func(*testing.B) {
+	runDecrypt := func(c *hbsh.HBSH) func(*testing.B) {
 		return func(b *testing.B) {
 			block := make([]byte, 4096)
 			tweak := make([]byte, 12)
 			b.SetBytes(int64(len(block)))
 			b.ReportAllocs()
 			for i := 0; i < b.N; i++ {
-				hpc.Decrypt(block, tweak)
+				c.Decrypt(block, tweak)
 			}
 		}
 	}
