@@ -30,11 +30,11 @@ func (h *hashNHPoly1305) Sum(dst, msg, tweak []byte) []byte {
 
 	// NH hash message in chunks of up to 1024 bytes
 	var outNH [32]byte
-	hashBuf := make([]byte, 0, 1024)
+	hashes := make([]byte, 0, 128) // won't need to realloc unless len(msg) > 4 KiB
 	buf := bytes.NewBuffer(msg)
 	for buf.Len() > 0 && buf.Len()%16 == 0 {
 		nh.Sum(&outNH, buf.Next(1024), h.keyNH[:])
-		hashBuf = append(hashBuf, outNH[:]...)
+		hashes = append(hashes, outNH[:]...)
 	}
 	// if final chunk is not a multiple of 16 bytes, pad it
 	if buf.Len() > 0 {
@@ -44,12 +44,12 @@ func (h *hashNHPoly1305) Sum(dst, msg, tweak []byte) []byte {
 			n += 16 - (n % 16)
 		}
 		nh.Sum(&outNH, msgBuf[:n], h.keyNH[:])
-		hashBuf = append(hashBuf, outNH[:]...)
+		hashes = append(hashes, outNH[:]...)
 	}
 
 	// poly1305 hash the NH hashes with keyM
 	var outM [16]byte
-	poly1305.Sum(&outM, hashBuf, &h.keyM)
+	poly1305.Sum(&outM, hashes, &h.keyM)
 
 	// return the sum of the hashes
 	sum := addHashes(outT, outM)
