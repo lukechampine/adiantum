@@ -23,7 +23,7 @@ type HBSH struct {
 	thash  TweakableHash
 
 	nonceBuf [24]byte
-	hashBuf  [16]byte
+	hashBuf  [32]byte
 }
 
 func (h *HBSH) streamXOR(nonce, msg []byte) []byte {
@@ -45,7 +45,8 @@ func (h *HBSH) decryptBlock(src []byte) []byte {
 	return src
 }
 
-// Encrypt encrypts block using the specified tweak.
+// Encrypt encrypts block using the specified tweak. The block must be at least
+// 16 bytes. The size of the tweak is restricted by the underlying primitives.
 func (h *HBSH) Encrypt(block, tweak []byte) []byte {
 	pl, pr := block[:len(block)-16], block[len(block)-16:]
 	pm := blockAdd(pr, h.hash(tweak, pl))
@@ -55,7 +56,8 @@ func (h *HBSH) Encrypt(block, tweak []byte) []byte {
 	return append(cl, cr...)
 }
 
-// Decrypt decrypts block using the specified tweak.
+// Decrypt decrypts block using the specified tweak. The block must be at least
+// 16 bytes. The size of the tweak is restricted by the underlying primitives.
 func (h *HBSH) Decrypt(block, tweak []byte) []byte {
 	cl, cr := block[:len(block)-16], block[len(block)-16:]
 	cm := blockAdd(cr, h.hash(tweak, cl))

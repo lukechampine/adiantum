@@ -6,7 +6,10 @@ import (
 	"github.com/aead/chacha20/chacha"
 )
 
-// NonceSize is the size of the XChaCha nonce.
+// KeySize is the size of an XChaCha key.
+const KeySize = chacha.KeySize
+
+// NonceSize is the size of an XChaCha nonce.
 const NonceSize = chacha.XNonceSize
 
 // XORKeyStream xors the bytes of src with the key stream derived from the key

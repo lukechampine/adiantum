@@ -68,6 +68,9 @@ func (s *chachaStream) XORKeyStream(msg, nonce []byte) {
 }
 
 func makeAdiantum(key []byte, chachaRounds int) (hbsh.StreamCipher, cipher.Block, hbsh.TweakableHash) {
+	if len(key) != xchacha.KeySize {
+		panic("adiantum: key must be 32 bytes long")
+	}
 	// create stream cipher and derive block+hash keys
 	stream := &chachaStream{key, chachaRounds}
 	keyBuf := bytes.NewBuffer(make([]byte, 32+16+16+1072))
@@ -76,23 +79,24 @@ func makeAdiantum(key []byte, chachaRounds int) (hbsh.StreamCipher, cipher.Block
 	hash := new(hashNHPoly1305)
 	copy(hash.keyT[:16], keyBuf.Next(16))
 	copy(hash.keyM[:16], keyBuf.Next(16))
-	copy(hash.keyNH[:], keyBuf.Next(1072))
+	copy(hash.keyNH[:], keyBuf.Next(1072)) // enough to hash a 1024-byte message
 	return stream, block, hash
 }
 
 // New8 returns an Adiantum cipher with the specified key, using XChaCha8 as the
-// stream cipher.
+// stream cipher. The key must be 32 bytes.
 func New8(key []byte) *hbsh.HBSH {
 	return hbsh.New(makeAdiantum(key, 8))
 }
 
-// New returns an Adiantum cipher with the specified key.
+// New returns an Adiantum cipher with the specified key. The key must be 32
+// bytes.
 func New(key []byte) *hbsh.HBSH {
 	return hbsh.New(makeAdiantum(key, 12))
 }
 
 // New20 returns an Adiantum cipher with the specified key, using XChaCha20 as
-// the stream cipher.
+// the stream cipher. The key must be 32 bytes.
 func New20(key []byte) *hbsh.HBSH {
 	return hbsh.New(makeAdiantum(key, 20))
 }

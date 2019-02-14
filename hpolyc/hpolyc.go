@@ -49,6 +49,9 @@ func (s *chachaStream) XORKeyStream(msg, nonce []byte) {
 }
 
 func makeHPolyC(key []byte, chachaRounds int) (hbsh.StreamCipher, cipher.Block, hbsh.TweakableHash) {
+	if len(key) != xchacha.KeySize {
+		panic("hpolyc: key must be 32 bytes long")
+	}
 	// create stream cipher and derive block+hash keys
 	stream := &chachaStream{key, chachaRounds}
 	keyBuf := make([]byte, 48)
@@ -60,18 +63,19 @@ func makeHPolyC(key []byte, chachaRounds int) (hbsh.StreamCipher, cipher.Block, 
 }
 
 // New8 returns an HPolyC cipher with the specified key, using XChaCha8 as the
-// stream cipher.
+// stream cipher. The key must be 32 bytes long.
 func New8(key []byte) *hbsh.HBSH {
 	return hbsh.New(makeHPolyC(key, 8))
 }
 
-// New returns an HPolyC cipher with the specified key.
+// New returns an HPolyC cipher with the specified key. The key must be 32 bytes
+// long.
 func New(key []byte) *hbsh.HBSH {
 	return hbsh.New(makeHPolyC(key, 12))
 }
 
 // New20 returns an HPolyC cipher with the specified key, using XChaCha20 as the
-// stream cipher.
+// stream cipher. The key must be 32 bytes long.
 func New20(key []byte) *hbsh.HBSH {
 	return hbsh.New(makeHPolyC(key, 20))
 }
