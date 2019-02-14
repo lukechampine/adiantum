@@ -66,13 +66,16 @@ detailed critique of disk encryption and some recommended alternatives.
 
 ## Benchmarks
 
+Tested on an i5-7600K @ 3.80GHz. Results will likely be slower on non-amd64
+architectures.
+
 ```
-BenchmarkAdiantum/XChaCha8_Encrypt-4      7289 ns/op      561.87 MB/s      0 allocs/op
-BenchmarkAdiantum/XChaCha8_Decrypt-4      7249 ns/op      565.01 MB/s      0 allocs/op
-BenchmarkAdiantum/XChaCha12_Encrypt-4     7558 ns/op      541.91 MB/s      0 allocs/op
-BenchmarkAdiantum/XChaCha12_Decrypt-4     7521 ns/op      544.57 MB/s      0 allocs/op
-BenchmarkAdiantum/XChaCha20_Encrypt-4     8097 ns/op      505.86 MB/s      0 allocs/op
-BenchmarkAdiantum/XChaCha20_Decrypt-4     8073 ns/op      507.34 MB/s      0 allocs/op
+BenchmarkAdiantum/XChaCha8_Encrypt-4      1479 ns/op     2768.92 MB/s      0 allocs/op
+BenchmarkAdiantum/XChaCha8_Decrypt-4      1477 ns/op     2772.76 MB/s      0 allocs/op
+BenchmarkAdiantum/XChaCha12_Encrypt-4     1748 ns/op     2341.98 MB/s      0 allocs/op
+BenchmarkAdiantum/XChaCha12_Decrypt-4     1748 ns/op     2342.57 MB/s      0 allocs/op
+BenchmarkAdiantum/XChaCha20_Encrypt-4     2288 ns/op     1789.87 MB/s      0 allocs/op
+BenchmarkAdiantum/XChaCha20_Decrypt-4     2283 ns/op     1793.88 MB/s      0 allocs/op
 
 BenchmarkHPolyC/XChaCha8_Encrypt-4        3448 ns/op     1187.74 MB/s      0 allocs/op
 BenchmarkHPolyC/XChaCha8_Decrypt-4        3437 ns/op     1191.50 MB/s      0 allocs/op
@@ -81,15 +84,3 @@ BenchmarkHPolyC/XChaCha12_Decrypt-4       3709 ns/op     1104.32 MB/s      0 all
 BenchmarkHPolyC/XChaCha20_Encrypt-4       4258 ns/op      961.77 MB/s      0 allocs/op
 BenchmarkHPolyC/XChaCha20_Decrypt-4       4245 ns/op      964.82 MB/s      0 allocs/op
 ```
-
-Currently, this package's Adiantum implementation is slower than its HPolyC
-implementation. While in theory, Adiantum should be faster than HPolyC on
-4096-byte messages, in practice this requires a fast implementation of the NH
-hash; this package uses a naive, pure-Go implementation. I do plan to implement
-NH in assembly at some point, after which Adiantum will (hopefully) be faster
-than HPolyC.
-
-Interestingly, my benchmarks are 2-3x faster than the figures given in the
-original paper. I'm not sure what accounts for this disparity, but I imagine it
-is largely because the authors tested on ARM, whereas my benchmarks are on
-amd64.
