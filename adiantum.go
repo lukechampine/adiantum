@@ -6,7 +6,6 @@ import (
 	"crypto/cipher"
 	"encoding/binary"
 
-	"github.com/aead/chacha20/chacha"
 	"golang.org/x/crypto/poly1305"
 	"lukechampine.com/adiantum/hbsh"
 	"lukechampine.com/adiantum/internal/xchacha"
@@ -71,8 +70,6 @@ func (s *chachaStream) XORKeyStream(msg, nonce []byte) {
 func makeAdiantum(key []byte, chachaRounds int) (hbsh.StreamCipher, cipher.Block, hbsh.TweakableHash) {
 	// create stream cipher and derive block+hash keys
 	stream := &chachaStream{key, chachaRounds}
-	nonce := make([]byte, chacha.XNonceSize)
-	nonce[0] = 1
 	keyBuf := bytes.NewBuffer(make([]byte, 32+16+16+1072))
 	stream.XORKeyStream(keyBuf.Bytes(), nil)
 	block, _ := aes.NewCipher(keyBuf.Next(32))
