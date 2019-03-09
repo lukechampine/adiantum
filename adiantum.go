@@ -31,19 +31,21 @@ func (h *hashNHPoly1305) Sum(dst, msg, tweak []byte) []byte {
 	// with keyM
 	mac := poly1305.New(&h.keyM)
 	var outNH [32]byte
-	buf := bytes.NewBuffer(msg)
-	for buf.Len() > 0 && buf.Len()%16 == 0 {
-		nh.Sum(&outNH, buf.Next(1024), h.keyNH[:])
+	for len(msg) >= 1024 {
+		nh.Sum(&outNH, msg[:1024], h.keyNH[:])
 		mac.Write(outNH[:])
+		msg = msg[1024:]
 	}
-	// if final chunk is not a multiple of 16 bytes, pad it
-	if buf.Len() > 0 {
-		var msgBuf [1024]byte
-		n := copy(msgBuf[:], buf.Next(1024))
-		if n%16 != 0 {
+	// handle final (incomplete) chunk, if it exists
+	if len(msg) > 0 {
+		// if necessary, pad to multiple of 16 bytes
+		if len(msg)%16 != 0 {
+			var pad [1024]byte
+			n := copy(pad[:], msg)
 			n += 16 - (n % 16)
+			msg = pad[:n]
 		}
-		nh.Sum(&outNH, msgBuf[:n], h.keyNH[:])
+		nh.Sum(&outNH, msg, h.keyNH[:])
 		mac.Write(outNH[:])
 	}
 	var outM [16]byte
