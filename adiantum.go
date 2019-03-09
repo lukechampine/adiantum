@@ -21,19 +21,20 @@ type hashNHPoly1305 struct {
 
 // Sum implements hbsh.Hash.
 func (h *hashNHPoly1305) Sum(dst, msg, tweak []byte) []byte {
-	// poly1305 hash append(bytes(8*len(msg)), tweak...) with keyT
+	// poly1305 hash 8*len(msg) and tweak with keyT
 	tweakBuf := make([]byte, 16+24)
 	binary.LittleEndian.PutUint64(tweakBuf[:8], uint64(8*len(msg)))
 	var outT [16]byte
 	poly1305.Sum(&outT, append(tweakBuf[:16], tweak...), &h.keyT)
 
-	// NH hash message in chunks of up to 1024 bytes
+	// NH hash message in chunks of up to 1024 bytes, then poly1305 those hashes
+	// with keyM
+	mac := poly1305.New(&h.keyM)
 	var outNH [32]byte
-	hashes := make([]byte, 0, 128) // won't need to realloc unless len(msg) > 4 KiB
 	buf := bytes.NewBuffer(msg)
 	for buf.Len() > 0 && buf.Len()%16 == 0 {
 		nh.Sum(&outNH, buf.Next(1024), h.keyNH[:])
-		hashes = append(hashes, outNH[:]...)
+		mac.Write(outNH[:])
 	}
 	// if final chunk is not a multiple of 16 bytes, pad it
 	if buf.Len() > 0 {
@@ -43,12 +44,10 @@ func (h *hashNHPoly1305) Sum(dst, msg, tweak []byte) []byte {
 			n += 16 - (n % 16)
 		}
 		nh.Sum(&outNH, msgBuf[:n], h.keyNH[:])
-		hashes = append(hashes, outNH[:]...)
+		mac.Write(outNH[:])
 	}
-
-	// poly1305 hash the NH hashes with keyM
 	var outM [16]byte
-	poly1305.Sum(&outM, hashes, &h.keyM)
+	mac.Sum(outM[:0])
 
 	// return the sum of the hashes
 	sum := addHashes(outT, outM)
