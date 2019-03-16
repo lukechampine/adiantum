@@ -22,8 +22,7 @@ type HBSH struct {
 	block  cipher.Block
 	thash  TweakableHash
 
-	nonceBuf [24]byte
-	hashBuf  [32]byte
+	hashBuf [32]byte
 }
 
 func (h *HBSH) streamXOR(nonce, msg []byte) []byte {
