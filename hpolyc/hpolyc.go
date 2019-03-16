@@ -11,29 +11,19 @@ import (
 )
 
 type hpolycHash struct {
-	key     [32]byte
-	hashBuf []byte
+	key [32]byte
 }
 
 func (h *hpolycHash) Sum(dst, msg, tweak []byte) []byte {
-	needed := 4 + len(tweak) + len(msg)
-	if headerSize := 4 + len(tweak); headerSize%16 != 0 {
-		needed += 16 - (headerSize % 16)
-	}
-	if needed > cap(h.hashBuf) {
-		h.hashBuf = make([]byte, needed)
-	}
-	h.hashBuf = h.hashBuf[:needed]
-	binary.LittleEndian.PutUint32(h.hashBuf[:4], uint32(8*len(tweak)))
-	copy(h.hashBuf[4:], tweak)
-	copy(h.hashBuf[needed-len(msg):], msg)
-	var out [16]byte
-	poly1305.Sum(&out, h.hashBuf, &h.key)
-	// clear secrets
-	for i := range h.hashBuf {
-		h.hashBuf[i] = 0
-	}
-	return append(dst, out[:]...)
+	lenbuf := make([]byte, 4)
+	binary.LittleEndian.PutUint32(lenbuf, uint32(8*len(tweak)))
+	padding := make([]byte, 16)[(4+len(tweak))%16:]
+	mac := poly1305.New(&h.key)
+	mac.Write(lenbuf)
+	mac.Write(tweak)
+	mac.Write(padding)
+	mac.Write(msg)
+	return mac.Sum(dst)
 }
 
 type chachaStream struct {

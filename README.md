@@ -77,10 +77,10 @@ BenchmarkAdiantum/XChaCha12_Decrypt-4     1748 ns/op     2342.57 MB/s      0 all
 BenchmarkAdiantum/XChaCha20_Encrypt-4     2288 ns/op     1789.87 MB/s      0 allocs/op
 BenchmarkAdiantum/XChaCha20_Decrypt-4     2283 ns/op     1793.88 MB/s      0 allocs/op
 
-BenchmarkHPolyC/XChaCha8_Encrypt-4        3448 ns/op     1187.74 MB/s      0 allocs/op
-BenchmarkHPolyC/XChaCha8_Decrypt-4        3437 ns/op     1191.50 MB/s      0 allocs/op
-BenchmarkHPolyC/XChaCha12_Encrypt-4       3719 ns/op     1101.19 MB/s      0 allocs/op
-BenchmarkHPolyC/XChaCha12_Decrypt-4       3709 ns/op     1104.32 MB/s      0 allocs/op
-BenchmarkHPolyC/XChaCha20_Encrypt-4       4258 ns/op      961.77 MB/s      0 allocs/op
-BenchmarkHPolyC/XChaCha20_Decrypt-4       4245 ns/op      964.82 MB/s      0 allocs/op
+BenchmarkHPolyC/XChaCha8_Encrypt-4        3448 ns/op     1285.53 MB/s      0 allocs/op
+BenchmarkHPolyC/XChaCha8_Decrypt-4        3437 ns/op     1289.96 MB/s      0 allocs/op
+BenchmarkHPolyC/XChaCha12_Encrypt-4       3719 ns/op     1186.35 MB/s      0 allocs/op
+BenchmarkHPolyC/XChaCha12_Decrypt-4       3709 ns/op     1184.61 MB/s      0 allocs/op
+BenchmarkHPolyC/XChaCha20_Encrypt-4       4258 ns/op     1026.22 MB/s      0 allocs/op
+BenchmarkHPolyC/XChaCha20_Decrypt-4       4245 ns/op     1028.97 MB/s      0 allocs/op
 ```
