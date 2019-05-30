@@ -3,6 +3,7 @@ package hbsh // import "lukechampine.com/adiantum/hbsh"
 import (
 	"crypto/cipher"
 	"encoding/binary"
+	"math/bits"
 )
 
 // A StreamCipher xors msg with a keystream, modified by a nonce.
@@ -75,32 +76,14 @@ func New(stream StreamCipher, block cipher.Block, hash TweakableHash) *HBSH {
 	}
 }
 
-func add64(x, y, carry uint64) (sum, carryOut uint64) {
-	yc := y + carry
-	sum = x + yc
-	if sum < x || yc < y {
-		carryOut = 1
-	}
-	return
-}
-
-func sub64(x, y, borrow uint64) (diff, borrowOut uint64) {
-	yb := y + borrow
-	diff = x - yb
-	if diff > x || yb < y {
-		borrowOut = 1
-	}
-	return
-}
-
 func blockAdd(x []byte, y []byte) []byte {
 	x1 := binary.LittleEndian.Uint64(x[:8])
 	x2 := binary.LittleEndian.Uint64(x[8:16])
 	y1 := binary.LittleEndian.Uint64(y[:8])
 	y2 := binary.LittleEndian.Uint64(y[8:16])
 
-	r1, c := add64(x1, y1, 0)
-	r2, _ := add64(x2, y2, c)
+	r1, c := bits.Add64(x1, y1, 0)
+	r2, _ := bits.Add64(x2, y2, c)
 
 	binary.LittleEndian.PutUint64(x[:8], r1)
 	binary.LittleEndian.PutUint64(x[8:], r2)
@@ -113,8 +96,8 @@ func blockSub(x []byte, y []byte) []byte {
 	y1 := binary.LittleEndian.Uint64(y[:8])
 	y2 := binary.LittleEndian.Uint64(y[8:16])
 
-	r1, c := sub64(x1, y1, 0)
-	r2, _ := sub64(x2, y2, c)
+	r1, c := bits.Sub64(x1, y1, 0)
+	r2, _ := bits.Sub64(x2, y2, c)
 
 	binary.LittleEndian.PutUint64(x[:8], r1)
 	binary.LittleEndian.PutUint64(x[8:], r2)

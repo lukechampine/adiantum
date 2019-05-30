@@ -5,6 +5,7 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"encoding/binary"
+	"math/bits"
 
 	"golang.org/x/crypto/poly1305"
 	"lukechampine.com/adiantum/hbsh"
@@ -107,11 +108,8 @@ func addHashes(x, y [16]byte) [16]byte {
 	x2 := binary.LittleEndian.Uint64(x[8:16])
 	y1 := binary.LittleEndian.Uint64(y[:8])
 	y2 := binary.LittleEndian.Uint64(y[8:16])
-	r1 := x1 + y1
-	r2 := x2 + y2
-	if r1 < x1 {
-		r2++
-	}
+	r1, c := bits.Add64(x1, y1, 0)
+	r2, _ := bits.Add64(x2, y2, c)
 	binary.LittleEndian.PutUint64(x[:8], r1)
 	binary.LittleEndian.PutUint64(x[8:], r2)
 	return x
