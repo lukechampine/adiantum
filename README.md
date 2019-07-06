@@ -50,7 +50,7 @@ func main() {
 
 To use Adiantum for disk encryption, simply set the tweak equal to the disk
 sector index. For example, to encrypt *n* consecutive 4096-byte sectors,
-increment the tweak by 1 after encrypting the each sector.
+increment the tweak by 1 after encrypting each sector.
 
 It is important to understand the threat model for disk encryption.
 Specifically, disk encryption is most effective when the attacker only sees one
